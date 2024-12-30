@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shirt Overlay</title>
+    <style>
+        #videoFeed {
+            width: 960px;
+            height: 720px;
+            display: block;
+            margin: 0 auto;
+        }
+        #controls {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shirt Overlay</h1>
+    <h3>Live Camera Feed with Shirt Overlay:</h3>
+    <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Live Video Feed">
+
+    <div id="controls">
+        <button id="prevButton">Previous Shirt</button>
+        <button id="nextButton">Next Shirt</button>
+    </div>
+
+    <script>
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+
+        prevButton.addEventListener('click', () => {
+            changeShirt('prev');
+        });
+
+        nextButton.addEventListener('click', () => {
+            changeShirt('next');
+        });
+
+        function changeShirt(direction) {
+            fetch('/change-shirt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ direction: direction })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Refresh the webcam feed by adding a timestamp to the source URL
+                const videoFeed = document.getElementById('videoFeed');
+                videoFeed.src = videoFeed.src.split('?')[0] + '?' + new Date().getTime();  // Prevent caching
+            });
+        }
+
+        // Listen for 'n' and 'p' keypress
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'n') {
+                changeShirt('next');
+            } else if (event.key === 'p') {
+                changeShirt('prev');
+            }
+        });
+    </script>
+</body>
+</html>
